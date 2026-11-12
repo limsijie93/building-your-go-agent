@@ -9,6 +9,6 @@
     "4": 4,
     "5": 5
   },
-  "tool": "",
+  "tool": "claude",
   "_tool_comment": "Choose before Practice 1: codex (Codex CLI or desktop app) or claude (Claude Code)."
 }
