@@ -1,0 +1,24 @@
+# Keep actual credentials and machine-specific settings out of submissions.
+.env
+.env.*
+!.env.example
+.mcp.json
+.cursor/mcp.json
+.vscode/mcp.json
+.claude/settings.local.json
+*.log
+.DS_Store
+bin/
+coverage.out
+# Native skills/agents, shared prompts and redacted evidence remain tracked.
+
+# Local credential/configuration files; never ignore entire agent directories.
+.claude/langsmith.json
+.codex/config.toml
+.codex/auth.json
+.codex/langsmith.json
+langsmith-plugins.json
+.local/
+results/*-injected.diff
+__pycache__/
+*.pyc

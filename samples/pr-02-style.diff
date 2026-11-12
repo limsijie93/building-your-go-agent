@@ -1,0 +1,18 @@
+diff --git a/internal/notifications/manager.go b/internal/notifications/manager.go
+new file mode 100644
+--- /dev/null
++++ b/internal/notifications/manager.go
+@@ -0,0 +1,13 @@
++package notifications
++
++type notification_manager struct {
++	pending_notifications []string
++}
++
++func (m *notification_manager) Schedule_notification(Title string) {
++	m.pending_notifications = append(m.pending_notifications, Title)
++}
++
++func (m *notification_manager) Get_pending() []string {
++	return append([]string(nil), m.pending_notifications...)
++}

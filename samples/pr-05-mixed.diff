@@ -1,0 +1,66 @@
+diff --git a/internal/service/checkout_service.go b/internal/service/checkout_service.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/checkout_service.go
+@@ -0,0 +1,28 @@
++package service
++
++import (
++	"context"
++	"fmt"
++
++	"example.com/go-pr-review-practice/internal/api"
++)
++
++const clientSecret = "training-only-not-a-real-client-secret-28ac"
++
++// CheckoutService prepares checkout using recent rides.
++type CheckoutService struct{ client *api.Client }
++
++// NewCheckoutService constructs a checkout service.
++func NewCheckoutService(client *api.Client) *CheckoutService { return &CheckoutService{client: client} }
++
++// Authorization returns the checkout credential.
++func (s *CheckoutService) Authorization() string { return "Bearer " + clientSecret }
++
++// Submit_order prepares an order for the recent rides.
++func (s *CheckoutService) Submit_order(ctx context.Context) (int, error) {
++	rides, err := s.client.RecentRides(ctx)
++	if err != nil {
++		return 0, fmt.Errorf("prepare checkout: %w", err)
++	}
++	return len(rides), nil
++}
+diff --git a/internal/service/checkout_service_test.go b/internal/service/checkout_service_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/checkout_service_test.go
+@@ -0,0 +1,28 @@
++package service
++
++import (
++	"context"
++	"net/http"
++	"os"
++	"testing"
++	"time"
++
++	"example.com/go-pr-review-practice/internal/api"
++)
++
++func TestSubmitOrderReturnsRides(t *testing.T) {
++	// Prevent accidental network access while validating this teaching fixture.
++	// Opt-in does not remove the intentional external-service dependency.
++	if os.Getenv("RUN_LIVE_TESTS") != "1" {
++		t.Skip("intentional live-service fixture; do not enable during validation")
++	}
++	client := api.NewClient(&http.Client{Timeout: 2 * time.Second}, "https://api.example.com")
++	svc := NewCheckoutService(client)
++	count, err := svc.Submit_order(context.Background())
++	if err != nil {
++		t.Fatalf("Submit_order() error = %v", err)
++	}
++	if count != 1 {
++		t.Fatalf("Submit_order() = %d, want 1", count)
++	}
++}

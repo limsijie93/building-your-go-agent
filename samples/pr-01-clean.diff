@@ -1,0 +1,78 @@
+diff --git a/internal/service/ride_history_service.go b/internal/service/ride_history_service.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/ride_history_service.go
+@@ -0,0 +1,30 @@
++package service
++
++import (
++	"context"
++	"fmt"
++
++	"example.com/go-pr-review-practice/internal/model"
++)
++
++// RideRepository provides the data needed by RideHistoryService.
++type RideRepository interface {
++	RecentRides(context.Context) ([]model.Ride, error)
++}
++
++// RideHistoryService loads recent trips through a repository.
++type RideHistoryService struct{ repository RideRepository }
++
++// NewRideHistoryService constructs a service with its repository.
++func NewRideHistoryService(repository RideRepository) *RideHistoryService {
++	return &RideHistoryService{repository: repository}
++}
++
++// LoadRides returns recent rides or the repository error with context.
++func (s *RideHistoryService) LoadRides(ctx context.Context) ([]model.Ride, error) {
++	rides, err := s.repository.RecentRides(ctx)
++	if err != nil {
++		return nil, fmt.Errorf("load rides: %w", err)
++	}
++	return rides, nil
++}
+diff --git a/internal/service/ride_history_service_test.go b/internal/service/ride_history_service_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/ride_history_service_test.go
+@@ -0,0 +1,38 @@
++package service
++
++import (
++	"context"
++	"errors"
++	"reflect"
++	"testing"
++
++	"example.com/go-pr-review-practice/internal/model"
++)
++
++type fakeRideRepository struct {
++	rides []model.Ride
++	err   error
++}
++
++func (f fakeRideRepository) RecentRides(context.Context) ([]model.Ride, error) { return f.rides, f.err }
++
++func TestLoadRidesReturnsRepositoryRides(t *testing.T) {
++	want := []model.Ride{{ID: "ride-1"}, {ID: "ride-2"}}
++	svc := NewRideHistoryService(fakeRideRepository{rides: want})
++	got, err := svc.LoadRides(context.Background())
++	if err != nil {
++		t.Fatalf("LoadRides() error = %v", err)
++	}
++	if !reflect.DeepEqual(got, want) {
++		t.Fatalf("LoadRides() = %v, want %v", got, want)
++	}
++}
++
++func TestLoadRidesPreservesRepositoryError(t *testing.T) {
++	want := errors.New("repository unavailable")
++	svc := NewRideHistoryService(fakeRideRepository{err: want})
++	_, err := svc.LoadRides(context.Background())
++	if !errors.Is(err, want) {
++		t.Fatalf("LoadRides() error = %v, want wrapped %v", err, want)
++	}
++}

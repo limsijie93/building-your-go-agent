@@ -1,0 +1,67 @@
+diff --git a/internal/service/trip_service.go b/internal/service/trip_service.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/trip_service.go
+@@ -0,0 +1,24 @@
++package service
++
++import (
++	"context"
++	"fmt"
++
++	"example.com/go-pr-review-practice/internal/api"
++	"example.com/go-pr-review-practice/internal/model"
++)
++
++// TripService loads a user's trips.
++type TripService struct{ client *api.Client }
++
++// NewTripService constructs a service with its data client.
++func NewTripService(client *api.Client) *TripService { return &TripService{client: client} }
++
++// LoadTrips retrieves the recent trips.
++func (s *TripService) LoadTrips(ctx context.Context) ([]model.Ride, error) {
++	rides, err := s.client.RecentRides(ctx)
++	if err != nil {
++		return nil, fmt.Errorf("load trips: %w", err)
++	}
++	return rides, nil
++}
+diff --git a/internal/service/trip_service_test.go b/internal/service/trip_service_test.go
+new file mode 100644
+--- /dev/null
++++ b/internal/service/trip_service_test.go
+@@ -0,0 +1,33 @@
++package service
++
++import (
++	"context"
++	"fmt"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++
++	"example.com/go-pr-review-practice/internal/api"
++)
++
++func TestLoadTripsReturnsRecentTrips(t *testing.T) {
++	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
++		if r.URL.Path != "/rides" {
++			http.NotFound(w, r)
++			return
++		}
++		w.Header().Set("Content-Type", "application/json")
++		if _, err := fmt.Fprint(w, `[{"id":"ride-1"}]`); err != nil {
++			t.Errorf("write response: %v", err)
++		}
++	}))
++	t.Cleanup(server.Close)
++	svc := NewTripService(api.NewClient(server.Client(), server.URL))
++	rides, err := svc.LoadTrips(context.Background())
++	if err != nil {
++		t.Fatalf("LoadTrips() error = %v", err)
++	}
++	if len(rides) != 1 || rides[0].ID != "ride-1" {
++		t.Fatalf("LoadTrips() = %v, want ride-1", rides)
++	}
++}
