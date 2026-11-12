@@ -2,11 +2,11 @@
 
 ## Steps
 
-1. Read the case number from the request and look up the PR in review-target.json.
-2. Fetch the PR with the GitHub MCP server (pull_request_read with get and get_diff).
-3. Review only the files in the requested scope.
-4. Apply app-conventions to .go files that don't end in _test.go, and test-conventions to files ending in _test.go. Load each skill only if the scope has that kind of file.
-5. Check the security rules from AGENTS.md.
-6. Compile the findings in your output format.
-7. Show the complete review and the target, and ask for confirmation before posting.
-8. Post only after a later, explicit yes or post. Never approve, merge or close a PR.
+Fetch the complete PR diff and changed-file list with the GitHub MCP server (pull_request_read with get, get_diff, and get_files), keeping the scope you ask for.
+Delegate to style-reviewer, then security-reviewer, then architecture-reviewer, in this order, waiting for each one to finish before starting the next.
+Pass each subagent the same complete in-scope diff and changed-file list, including test files.
+Stop and report an incomplete review if any subagent fails.
+Merge the three results into one review, organized by file, without duplicates. A hardcoded credential and the matching Configuration guideline become one [HIGH] finding.
+Mask credential values.
+Show the complete review and the target, then ask for confirmation before posting.
+Post only after a later, explicit yes or post.
