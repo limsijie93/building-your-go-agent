@@ -8,4 +8,5 @@ Explicit error handling: no discarded errors, and wrapping with fmt.Errorf("…:
 
 ## Template
 
-[PLACEHOLDER]
+One compliant and one non-compliant Go snippet.
+
