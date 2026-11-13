@@ -10,3 +10,8 @@ Merge the three results into one review, organized by file, without duplicates. 
 Mask credential values.
 Show the complete review and the target, then ask for confirmation before posting.
 Post only after a later, explicit yes or post.
+## Local-file rule
+
+Only when the user explicitly names a local diff file (for example `results/pr-03-injected.diff`), review that file instead of fetching from GitHub. Make no GitHub MCP read or write for that run.
+Label the target as local, with the file path and `head: local (no remote SHA)`. Pass the complete local diff, with credential values masked, to the same three reviewers in the same order.
+In local mode the posting gate is simulated: show the complete draft and target, ask, and on a later yes/post record that the gate was passed, without any remote write.
